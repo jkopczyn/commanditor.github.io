@@ -3,6 +3,7 @@ import {
     EditorAction,
     registerEditorAction,
 } from "monaco-editor/esm/vs/editor/browser/editorExtensions";
+import { ConfigController } from "../contributions/config";
 
 export class ToggleWordWrapAction extends EditorAction {
     static ID = "commanditor.action.toggleWordWrap";
@@ -23,7 +24,8 @@ export class ToggleWordWrapAction extends EditorAction {
 
     run(accessor, editor) {
         const current = editor.getOption(monaco.editor.EditorOption.wordWrap);
-        editor.updateOptions({ wordWrap: current === "off" ? "on" : "off" });
+        const newValue = current === "off" ? "on" : "off";
+        ConfigController.get(editor).updateConfigValue("wordWrap", newValue);
     }
 }
 
