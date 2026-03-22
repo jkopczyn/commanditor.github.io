@@ -3,6 +3,8 @@ import * as monaco from "./monaco";
 // import custom contributions and commands
 import "./commands/ChangeLanguageModeAction";
 import "./commands/ChangeEditorThemeAction";
+import "./commands/ToggleWordWrapAction";
+import "./commands/ToggleRenderWhitespaceAction";
 import "./contributions/editMargin";
 import "./contributions/drive";
 import "./contributions/config";

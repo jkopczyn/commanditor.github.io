@@ -24,16 +24,18 @@ export class ConfigController extends Disposable {
         // wrap, font-size, minimap, ...?
         this.config = {
             theme: "vs",
+            wordWrap: "off",
+            renderWhitespace: "none",
         };
-
-        // on init try to load config from local storage, its faster than fetching from drive
-        const localStorageConfig = this.local_getAppConfig();
-        if (localStorageConfig) this.updateConfig(localStorageConfig, false);
 
         this.configFileInfo = undefined;
 
         this._editor = editor;
         this._drive = DriveController.get(this._editor);
+
+        // on init try to load config from local storage, its faster than fetching from drive
+        const localStorageConfig = this.local_getAppConfig();
+        if (localStorageConfig) this.updateConfig(localStorageConfig, false);
 
         GapiAuthController.get(this._editor).onLoggedInChanged((b) =>
             this.handleLoggedInChange(b)
@@ -91,6 +93,14 @@ export class ConfigController extends Disposable {
                     this.config.theme = value;
                     monaco.editor.setTheme(value);
                     return true;
+                case "wordWrap":
+                    this.config.wordWrap = value;
+                    this._editor.updateOptions({ wordWrap: value });
+                    return true;
+                case "renderWhitespace":
+                    this.config.renderWhitespace = value;
+                    this._editor.updateOptions({ renderWhitespace: value });
+                    return true;
                 default:
                     console.error(
                         "tried to update config value without handling updating it"
@@ -115,6 +125,16 @@ export class ConfigController extends Disposable {
                     value === "vs-dark" ||
                     value === "hc-light" ||
                     value === "hc-black"
+                );
+            case "wordWrap":
+                return value === "on" || value === "off";
+            case "renderWhitespace":
+                return (
+                    value === "none" ||
+                    value === "all" ||
+                    value === "boundary" ||
+                    value === "selection" ||
+                    value === "trailing"
                 );
             default:
                 return false;
