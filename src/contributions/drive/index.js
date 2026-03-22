@@ -378,7 +378,7 @@ export class DriveController extends Disposable {
             return;
         }
 
-        document.title = `commanditor (${filename})`;
+        document.title = `${filename} - commanditor`;
     }
 
     getId() {
