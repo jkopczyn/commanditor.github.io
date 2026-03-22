@@ -24,12 +24,30 @@ export function getUrlState() {
     };
 }
 
+const SHELL_DOTFILES = new Set([
+    ".bashrc",
+    ".bash_profile",
+    ".bash_logout",
+    ".profile",
+    ".zshrc",
+    ".zprofile",
+    ".zshenv",
+    ".zlogin",
+]);
+
 /**
  * tries to get the monaco-language for a filename
  * @param {string} fileName the file name
  * @returns {string} the monaco language id, or NULL if not supported (set plaintext as fallback if needed)
  */
 export function getMonacoLanguageForFilename(fileName) {
+    if (SHELL_DOTFILES.has(fileName)) {
+        const shellLang = monaco.languages
+            .getLanguages()
+            .find((lang) => lang.id === "shell");
+        return shellLang || null;
+    }
+
     const monacoLanguages = monaco.languages.getLanguages();
     const matches = monacoLanguages.filter((lang) =>
         lang.extensions?.some((ext) => fileName.endsWith(ext))

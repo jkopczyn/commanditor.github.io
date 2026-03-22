@@ -53,6 +53,7 @@ import "monaco-editor/esm/vs/basic-languages/sql/sql.contribution.js";
 import "monaco-editor/esm/vs/basic-languages/swift/swift.contribution.js";
 import "monaco-editor/esm/vs/basic-languages/vb/vb.contribution.js";
 import "monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js";
+import "monaco-editor/esm/vs/basic-languages/shell/shell.contribution.js";
 import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution.js";
 import "monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution";
 import "monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution";

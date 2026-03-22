@@ -49,6 +49,17 @@ export class DriveController extends Disposable {
     handleLoggedInChange(b) {
         if (!b || (b && this.state)) return;
 
+        if (import.meta.env.DEV) {
+            const devfile = new URLSearchParams(window.location.search).get("devfile");
+            if (devfile) {
+                this.currentFileInfo = { id: null, name: devfile };
+                this.setDocumentFileTitle(devfile);
+                const lang = getMonacoLanguageForFilename(devfile) || { id: "plaintext" };
+                this._editor.getModel().setMode ? this._editor.getModel().setMode(lang.id) : monaco.editor.setModelLanguage(this._editor.getModel(), lang.id);
+                return;
+            }
+        }
+
         // try to load file from url-state
         const state = getUrlState();
         this.state = state;
@@ -378,7 +389,7 @@ export class DriveController extends Disposable {
             return;
         }
 
-        document.title = `commanditor (${filename})`;
+        document.title = `${filename} - commanditor`;
     }
 
     getId() {
