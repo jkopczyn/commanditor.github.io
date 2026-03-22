@@ -40,6 +40,24 @@ export class DriveController extends Disposable {
         this.currentFileInfo = undefined;
         this.currentFileSavedContent = undefined;
 
+        this._beforeUnloadHandler = (e) => {
+            if (
+                this.currentFileModel &&
+                this.currentFileModel.getValue() !== this.currentFileSavedContent
+            ) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", this._beforeUnloadHandler);
+        this._register({
+            dispose: () =>
+                window.removeEventListener(
+                    "beforeunload",
+                    this._beforeUnloadHandler
+                ),
+        });
+
         this.gapiAuthController = GapiAuthController.get(this._editor);
         this.gapiAuthController.onLoggedInChanged((b) =>
             this.handleLoggedInChange(b)
@@ -56,6 +74,8 @@ export class DriveController extends Disposable {
                 this.setDocumentFileTitle(devfile);
                 const lang = getMonacoLanguageForFilename(devfile) || { id: "plaintext" };
                 this._editor.getModel().setMode ? this._editor.getModel().setMode(lang.id) : monaco.editor.setModelLanguage(this._editor.getModel(), lang.id);
+                this.currentFileModel = this._editor.getModel();
+                this.currentFileSavedContent = this.currentFileModel.getValue();
                 return;
             }
         }
