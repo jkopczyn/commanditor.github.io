@@ -14,6 +14,8 @@ import { Emitter } from "monaco-editor/esm/vs/base/common/event";
 import * as GAPI_CONSTS from "../gapi_consts";
 import { getUrlState } from "../Utils";
 
+const TOKEN_STORAGE_KEY = "commanditor.gapi_token";
+
 export class GapiAuthController extends Disposable {
     constructor(editor) {
         super();
@@ -22,6 +24,35 @@ export class GapiAuthController extends Disposable {
         this._onLoggedInChangedEmitter = new Emitter();
 
         this.tokenClient = null;
+    }
+
+    _saveToken(tokenResponse) {
+        try {
+            const expiresInMs = (parseInt(tokenResponse.expires_in) - 60) * 1000;
+            const tokenToSave = {
+                ...gapi.client.getToken(),
+                expires_at: Date.now() + expiresInMs,
+            };
+            localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokenToSave));
+        } catch (e) {
+            console.warn("could not save token to localStorage", e);
+        }
+    }
+
+    _tryRestoreSavedToken() {
+        try {
+            const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
+            if (!raw) return false;
+            const token = JSON.parse(raw);
+            if (token.expires_at && Date.now() < token.expires_at) {
+                gapi.client.setToken(token);
+                this.handleGapiAuthChange(true);
+                return true;
+            }
+        } catch (e) {
+            console.warn("could not restore token from localStorage", e);
+        }
+        return false;
     }
 
     get onLoggedInChanged() {
@@ -33,6 +64,10 @@ export class GapiAuthController extends Disposable {
     }
 
     loadGapi() {
+        if (import.meta.env.DEV) {
+            this.handleGapiAuthChange(true);
+            return;
+        }
         if (!!window.gapi && !!window.google) {
             window.handleClientLoad = () => {};
 
@@ -59,6 +94,7 @@ export class GapiAuthController extends Disposable {
             hint: hint,
             callback: (tokenResponse) => {
                 if (tokenResponse && tokenResponse.access_token) {
+                    this._saveToken(tokenResponse);
                     this.handleGapiAuthChange(this.isLoggedIn);
                 }
             },
@@ -68,7 +104,9 @@ export class GapiAuthController extends Disposable {
         });
 
         if (hint) {
-            this.tokenClient.requestAccessToken({ prompt: "" });
+            if (!this._tryRestoreSavedToken()) {
+                this.tokenClient.requestAccessToken({ prompt: "" });
+            }
         }
     }
 
@@ -112,6 +150,7 @@ export class GapiAuthController extends Disposable {
                         if (res.error !== undefined) {
                             reject(res);
                         }
+                        this._saveToken(res);
                         resolve(res);
                     };
                     this.tokenClient.error_callback = (err) => {
