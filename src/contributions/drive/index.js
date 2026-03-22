@@ -40,6 +40,24 @@ export class DriveController extends Disposable {
         this.currentFileInfo = undefined;
         this.currentFileSavedContent = undefined;
 
+        this._beforeUnloadHandler = (e) => {
+            if (
+                this.currentFileModel &&
+                this.currentFileModel.getValue() !== this.currentFileSavedContent
+            ) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", this._beforeUnloadHandler);
+        this._register({
+            dispose: () =>
+                window.removeEventListener(
+                    "beforeunload",
+                    this._beforeUnloadHandler
+                ),
+        });
+
         this.gapiAuthController = GapiAuthController.get(this._editor);
         this.gapiAuthController.onLoggedInChanged((b) =>
             this.handleLoggedInChange(b)
