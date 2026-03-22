@@ -33,6 +33,10 @@ export class GapiAuthController extends Disposable {
     }
 
     loadGapi() {
+        if (import.meta.env.DEV) {
+            this.handleGapiAuthChange(true);
+            return;
+        }
         if (!!window.gapi && !!window.google) {
             window.handleClientLoad = () => {};
 

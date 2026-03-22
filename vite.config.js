@@ -7,6 +7,7 @@ export default defineConfig({
     server: {
         open: "/app/",
         port: 3000,
+        strictPort: true,
     },
     build: {
         rollupOptions: {
