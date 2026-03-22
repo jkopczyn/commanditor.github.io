@@ -28,14 +28,14 @@ export class ConfigController extends Disposable {
             renderWhitespace: "none",
         };
 
-        // on init try to load config from local storage, its faster than fetching from drive
-        const localStorageConfig = this.local_getAppConfig();
-        if (localStorageConfig) this.updateConfig(localStorageConfig, false);
-
         this.configFileInfo = undefined;
 
         this._editor = editor;
         this._drive = DriveController.get(this._editor);
+
+        // on init try to load config from local storage, its faster than fetching from drive
+        const localStorageConfig = this.local_getAppConfig();
+        if (localStorageConfig) this.updateConfig(localStorageConfig, false);
 
         GapiAuthController.get(this._editor).onLoggedInChanged((b) =>
             this.handleLoggedInChange(b)
